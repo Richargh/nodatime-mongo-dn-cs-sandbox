@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using MongoDB.Driver;
@@ -25,6 +24,14 @@ namespace Richargh.Sandbox.NodatimeMongo.Persistence
         public async Task<ZonedDateTimePizza?> FindById(ZonedDateTimePizzaId id)
         {
             return (await _allPizzas.FindAsync(x => x.Id.Equals(id))).FirstOrDefault();
+        }
+
+        public Task<List<ZonedDateTimePizza>> FindOlderThan(ZonedDateTime utcNow)
+        {
+            // cannot get the following to work. Comparing ZoneDateTimes is not supported. Probably because they are represented as strings internally
+            Builders<ZonedDateTimePizza>.Filter.Lt(x => x.DateTime, utcNow);
+            var comparer = ZonedDateTime.Comparer.Instant;
+            return _allPizzas.Find(x => comparer.Compare(x.DateTime, utcNow) < 0).ToListAsync();
         }
     }
 }
