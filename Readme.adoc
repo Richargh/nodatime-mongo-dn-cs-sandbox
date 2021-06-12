@@ -20,6 +20,20 @@ this project is all about marrying Nodatime to Mongo.
 
 == Troubleshooting
 
+=== Something was not written to Mongo
+
+* Check what is actually written to mongo by:
+* EITHER Keep using Testcontainers:
+** Create a breakpoint right before the assertion
+* OR use your own docker instance
+** Comment `await _mongoContainer.StartAsync();` so it's no longer executed
+** Start Mongo instance: `docker run -p 27017:27017 --rm --name mongodb mongo`
+** Run the test you want to investigate
+* Open link:https://robomongo.org/download[Robo 3T (not Studio) or similar] and connect to `localhost:27017`
+* After that don't forget to remove the container (see <<Already in use>>).
+
+
+=== Already in use
 > The container name mongo is already in use by container <containerId>
 
 The container instance was not shut down properly. Can happen when you debug for example. You need to open your terminal/shell find out the id of your mongo container and shut it down by hand before removing it.
