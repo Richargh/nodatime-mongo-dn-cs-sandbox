@@ -62,7 +62,7 @@ namespace Richargh.Sandbox.NodatimeMongo.IntTest.Persistence
             await _testling.Put(pizza);
             // when
             var result = await _testling.FindOlderThan(
-                new ZonedDateTime(Instant.FromDateTimeUtc(DateTime.UtcNow) - Duration.FromMinutes(1), DateTimeZone.Utc));
+                new ZonedDateTime(_clock.GetCurrentInstant() - Duration.FromMinutes(1), DateTimeZone.Utc));
             // then
             result.Select(x => x.Id).Should().HaveCount(1).And.Contain(pizza.Id);
         }
@@ -76,7 +76,7 @@ namespace Richargh.Sandbox.NodatimeMongo.IntTest.Persistence
             await _testling.Put(pizza);
             // when
             var result = await _testling.FindOlderThan(
-                new ZonedDateTime(Instant.FromDateTimeUtc(DateTime.UtcNow) + Duration.FromMinutes(1), DateTimeZone.Utc));
+                new ZonedDateTime(_clock.GetCurrentInstant() + Duration.FromMinutes(1), DateTimeZone.Utc));
             // then
             result.Select(x => x.Id).Should().HaveCount(0);
         }
