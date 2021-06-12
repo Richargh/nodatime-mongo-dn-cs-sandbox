@@ -12,7 +12,7 @@ namespace Richargh.Sandbox.NodatimeMongo.IntTest.Persistence
     [Collection(MongoCollection.Name)]
     public class MongoPizzasTest : IAsyncLifetime
     {
-        private readonly IPizzas _testling;
+        private readonly IDateTimePizzas _testling;
         private readonly TestcontainersContainer _mongoContainer;
 
         public MongoPizzasTest()
@@ -22,7 +22,7 @@ namespace Richargh.Sandbox.NodatimeMongo.IntTest.Persistence
                 .WithName("mongo")
                 .WithPortBinding(MongoCollection.MongoPort);
             _mongoContainer = testcontainersBuilder.Build();
-            _testling = new MongoPizzas(new MongoUrl(MongoCollection.MongoUrl));
+            _testling = new MongoDateTimePizzas(new MongoUrl(MongoCollection.MongoUrl));
         }
 
         public async Task InitializeAsync()
@@ -39,7 +39,7 @@ namespace Richargh.Sandbox.NodatimeMongo.IntTest.Persistence
         public async Task AddOnePizza()
         {
             // given
-            var pizza = Pizza.Now(PizzaId.Random());
+            var pizza = DateTimePizza.Now(DateTimePizzaId.Random());
             // when
             await _testling.Put(pizza);
             // then
@@ -52,7 +52,7 @@ namespace Richargh.Sandbox.NodatimeMongo.IntTest.Persistence
         {
             // given
             // when
-            var result = await _testling.FindById(PizzaId.Random());
+            var result = await _testling.FindById(DateTimePizzaId.Random());
             // then
             result.Should().BeNull();
         }

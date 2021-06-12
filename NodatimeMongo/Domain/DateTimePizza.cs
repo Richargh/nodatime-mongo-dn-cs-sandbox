@@ -3,16 +3,16 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace Richargh.Sandbox.NodatimeMongo.Domain
 {
-    public class Pizza
+    public class DateTimePizza
     {
         [BsonId]
-        public PizzaId Id { get; }
+        public DateTimePizzaId Id { get; }
 
         public DateTime DateTimeUtc { get; }
         public DateTime DateTimeLocal { get; }
 
-        public Pizza(
-            PizzaId id, 
+        public DateTimePizza(
+            DateTimePizzaId id, 
             DateTime dateTimeUtc, 
             DateTime dateTimeLocal)
         {
@@ -22,8 +22,8 @@ namespace Richargh.Sandbox.NodatimeMongo.Domain
             DateTimeLocal = dateTimeLocal;
         }
 
-        public static Pizza Now(PizzaId id)
-            => new Pizza(
+        public static DateTimePizza Now(DateTimePizzaId id)
+            => new DateTimePizza(
                 id,
                 DateTime.UtcNow,
                 DateTime.UtcNow.ToLocalTime());
