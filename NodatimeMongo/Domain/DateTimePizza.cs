@@ -23,11 +23,6 @@ namespace Richargh.Sandbox.NodatimeMongo.Domain
             DateTimeUtc = dateTimeUtc;
             DateTimeLocal = dateTimeLocal;
         }
-
-        public static DateTimePizza Now(DateTimePizzaId id)
-            => new DateTimePizza(
-                id,
-                DateTime.UtcNow,
-                DateTime.UtcNow.ToLocalTime());
+            
     }
 }

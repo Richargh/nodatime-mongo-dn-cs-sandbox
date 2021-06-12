@@ -15,11 +15,13 @@ namespace Richargh.Sandbox.NodatimeMongo.IntTest.Persistence
     [Collection(MongoCollection.Name)]
     public class MongoPizzas_InstantTest : IAsyncLifetime
     {
+        private readonly IClock _clock;
         private readonly IInstantPizzas _testling;
         private readonly TestcontainersContainer _mongoContainer;
         
         public MongoPizzas_InstantTest()
         {
+            _clock = SystemClock.Instance;
             var testcontainersBuilder = new TestcontainersBuilder<TestcontainersContainer>()
                 .WithImage("mongo")
                 .WithName("mongo")
@@ -42,7 +44,7 @@ namespace Richargh.Sandbox.NodatimeMongo.IntTest.Persistence
         public async Task UtcInstantNotNull()
         {
             // given
-            var pizza = InstantPizza.Now(InstantPizzaId.Random());
+            var pizza = CreatePizza();
             // when
             await _testling.Put(pizza);
             // then
@@ -55,7 +57,7 @@ namespace Richargh.Sandbox.NodatimeMongo.IntTest.Persistence
         public async Task OnePizzaOlder()
         {
             // given
-            var pizza = InstantPizza.Now(InstantPizzaId.Random());
+            var pizza = CreatePizza();
             await _testling.Put(pizza);
             // when
             var result = await _testling.FindOlderThan(
@@ -68,7 +70,7 @@ namespace Richargh.Sandbox.NodatimeMongo.IntTest.Persistence
         public async Task NoPizzaOlderthanFuture()
         {
             // given
-            var pizza = InstantPizza.Now(InstantPizzaId.Random());
+            var pizza = CreatePizza();
             await _testling.Put(pizza);
             // when
             var result = await _testling.FindOlderThan(
@@ -76,5 +78,10 @@ namespace Richargh.Sandbox.NodatimeMongo.IntTest.Persistence
             // then
             result.Select(x => x.Id).Should().HaveCount(0);
         }
+
+        private InstantPizza CreatePizza() 
+            => new InstantPizza(
+                InstantPizzaId.Random(),
+                _clock.GetCurrentInstant());
     }
 }

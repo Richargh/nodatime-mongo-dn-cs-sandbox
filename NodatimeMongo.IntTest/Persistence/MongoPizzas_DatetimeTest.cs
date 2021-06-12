@@ -37,12 +37,34 @@ namespace Richargh.Sandbox.NodatimeMongo.IntTest.Persistence
         {
             await _mongoContainer.DisposeAsync();
         }
+        
+        [Fact(DisplayName = "Should be able to retrieve the pizza that was added")]
+        public async Task AddOnePizza()
+        {
+            // given
+            var pizza = CreatePizza();
+            // when
+            await _testling.Put(pizza);
+            // then
+            var result = await _testling.FindById(pizza.Id);
+            result.Should().NotBeNull();
+        }
+        
+        [Fact(DisplayName = "Should not be able to retrieve a Pizza with an unknown id")]
+        public async Task UnknownId()
+        {
+            // given
+            // when
+            var result = await _testling.FindById(DateTimePizzaId.Random());
+            // then
+            result.Should().BeNull();
+        }
 
         [Fact(DisplayName = "Should be able to deserialize Utc Datetime")]
         public async Task UtcDateTimeNotNull()
         {
             // given
-            var pizza = DateTimePizza.Now(DateTimePizzaId.Random());
+            var pizza = CreatePizza();
             // when
             await _testling.Put(pizza);
             // then
@@ -55,7 +77,7 @@ namespace Richargh.Sandbox.NodatimeMongo.IntTest.Persistence
         public async Task LocalDateTimeNotNull()
         {
             // given
-            var pizza = DateTimePizza.Now(DateTimePizzaId.Random());
+            var pizza = CreatePizza();
             // when
             await _testling.Put(pizza);
             // then
@@ -67,7 +89,7 @@ namespace Richargh.Sandbox.NodatimeMongo.IntTest.Persistence
         public async Task OnePizzaOlder()
         {
             // given
-            var pizza = DateTimePizza.Now(DateTimePizzaId.Random());
+            var pizza = CreatePizza();
             await _testling.Put(pizza);
             // when
             var result = await _testling.FindOlderThan(DateTime.UtcNow - 1.Minutes());
@@ -79,12 +101,19 @@ namespace Richargh.Sandbox.NodatimeMongo.IntTest.Persistence
         public async Task NoPizzaOlderthanFuture()
         {
             // given
-            var pizza = DateTimePizza.Now(DateTimePizzaId.Random());
+            var pizza = CreatePizza();
             await _testling.Put(pizza);
             // when
             var result = await _testling.FindOlderThan(DateTime.UtcNow + 1.Minutes());
             // then
             result.Select(x => x.Id).Should().HaveCount(0);
         }
+
+        public static DateTimePizza CreatePizza()
+            => new DateTimePizza(
+                DateTimePizzaId.Random(),
+                DateTime.UtcNow,
+                DateTime.UtcNow.ToLocalTime());
+        
     }
 }

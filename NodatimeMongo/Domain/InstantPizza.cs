@@ -22,10 +22,5 @@ namespace Richargh.Sandbox.NodatimeMongo.Domain
             
             InstantUtc = instantUtc;
         }
-
-        public static InstantPizza Now(InstantPizzaId id)
-            => new InstantPizza(
-                id,
-                Instant.FromDateTimeUtc(DateTime.UtcNow));
     }
 }

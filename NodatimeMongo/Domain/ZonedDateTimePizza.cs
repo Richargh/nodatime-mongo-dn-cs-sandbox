@@ -21,10 +21,5 @@ namespace Richargh.Sandbox.NodatimeMongo.Domain
             
             DateTime = dateTime;
         }
-
-        public static ZonedDateTimePizza Now(ZonedDateTimePizzaId id)
-            => new ZonedDateTimePizza(
-                id,
-                new ZonedDateTime(Instant.FromDateTimeUtc(System.DateTime.UtcNow), DateTimeZone.Utc));
     }
 }
