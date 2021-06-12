@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using SharpCompress.Compressors.Xz;
 
 namespace Richargh.Sandbox.NodatimeMongo.Lang
 {
