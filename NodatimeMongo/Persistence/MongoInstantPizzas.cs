@@ -26,9 +26,9 @@ namespace Richargh.Sandbox.NodatimeMongo.Persistence
             return (await _allPizzas.FindAsync(x => x.Id.Equals(id))).FirstOrDefault();
         }
 
-        public Task<List<InstantPizza>> FindOlderThan(Instant utcNow)
+        public Task<List<InstantPizza>> FindOlderThan(Instant instant)
         {
-            return _allPizzas.Find(x => x.Instant > utcNow).ToListAsync();
+            return _allPizzas.Find(x => x.Instant > instant).ToListAsync();
         }
     }
 }

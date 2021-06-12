@@ -41,7 +41,7 @@ namespace Richargh.Sandbox.NodatimeMongo.IntTest.Persistence
         }
 
         [Fact(DisplayName = "Should be able to deserialize ZonedDatetime")]
-        public async Task UtcDateTimeNotNull()
+        public async Task ZonedDateTimeNotNull()
         {
             // given
             var pizza = CreatePizza();

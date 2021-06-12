@@ -10,6 +10,6 @@ namespace Richargh.Sandbox.NodatimeMongo.Domain
 
         public Task<ZonedDateTimePizza?> FindById(ZonedDateTimePizzaId id);
 
-        public Task<List<ZonedDateTimePizza>> FindOlderThan(ZonedDateTime utcNow);
+        public Task<List<ZonedDateTimePizza>> FindOlderThan(ZonedDateTime zonedDateTime);
     }
 }

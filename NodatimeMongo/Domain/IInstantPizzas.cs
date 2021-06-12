@@ -11,6 +11,6 @@ namespace Richargh.Sandbox.NodatimeMongo.Domain
 
         public Task<InstantPizza?> FindById(InstantPizzaId id);
         
-        Task<List<InstantPizza>> FindOlderThan(Instant utcNow);
+        Task<List<InstantPizza>> FindOlderThan(Instant instant);
     }
 }
