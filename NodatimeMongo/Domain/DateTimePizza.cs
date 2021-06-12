@@ -9,6 +9,8 @@ namespace Richargh.Sandbox.NodatimeMongo.Domain
         public DateTimePizzaId Id { get; }
 
         public DateTime DateTimeUtc { get; }
+        
+        [BsonDateTimeOptions(Kind = DateTimeKind.Local)]
         public DateTime DateTimeLocal { get; }
 
         public DateTimePizza(

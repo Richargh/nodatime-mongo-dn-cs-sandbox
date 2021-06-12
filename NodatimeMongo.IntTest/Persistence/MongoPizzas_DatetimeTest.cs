@@ -51,8 +51,7 @@ namespace Richargh.Sandbox.NodatimeMongo.IntTest.Persistence
         }
         
         [Fact(
-            DisplayName = "Should be able to deserialize Local Datetime",
-            Skip = "This does not work. By default mongo serializes dates as Utc and does not make them local again on deserialize")]
+            DisplayName = "Should be able to deserialize Local Datetime")]
         public async Task LocalDateTimeNotNull()
         {
             // given
