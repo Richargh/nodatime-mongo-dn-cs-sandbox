@@ -12,15 +12,15 @@ namespace Richargh.Sandbox.NodatimeMongo.Domain
         public InstantPizzaId Id { get; }
 
         [BsonSerializer(typeof(InstantSerializer))]
-        public Instant InstantUtc { get; }
+        public Instant Instant { get; }
         
         public InstantPizza(
             InstantPizzaId id, 
-            Instant instantUtc)
+            Instant instant)
         {
             Id = id;
             
-            InstantUtc = instantUtc;
+            Instant = instant;
         }
     }
 }

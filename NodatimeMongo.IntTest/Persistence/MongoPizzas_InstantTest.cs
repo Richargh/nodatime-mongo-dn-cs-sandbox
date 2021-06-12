@@ -40,8 +40,8 @@ namespace Richargh.Sandbox.NodatimeMongo.IntTest.Persistence
             await _mongoContainer.DisposeAsync();
         }
 
-        [Fact(DisplayName = "Should be able to deserialize Utc Instant")]
-        public async Task UtcInstantNotNull()
+        [Fact(DisplayName = "Should be able to deserialize Instant")]
+        public async Task InstantNotNull()
         {
             // given
             var pizza = CreatePizza();
@@ -49,8 +49,8 @@ namespace Richargh.Sandbox.NodatimeMongo.IntTest.Persistence
             await _testling.Put(pizza);
             // then
             var result = await _testling.FindById(pizza.Id);
-            result!.InstantUtc.ToUnixTimeMilliseconds().Should().Be(pizza.InstantUtc.ToUnixTimeMilliseconds());
-            // result!.InstantUtc.Should().Be(pizza.InstantUtc); // cannot assert this because some nanosecond precision is lost after deserialization
+            result!.Instant.ToUnixTimeMilliseconds().Should().Be(pizza.Instant.ToUnixTimeMilliseconds());
+            // result!.Instant.Should().Be(pizza.Instant); // cannot assert this because some nanosecond precision is lost after deserialization
         }
         
         [Fact(DisplayName = "Should be able to find one Pizza older than one minute ago")]
