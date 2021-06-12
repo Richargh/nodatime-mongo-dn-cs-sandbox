@@ -7,20 +7,24 @@ using Xunit;
 
 namespace Richargh.Sandbox.NodatimeMongo.IntTest.Persistence
 {
+    [Collection(MongoCollection.Name)]
     public class MongoPizzasTest
     {
-        private const string MongoUrl = "mongodb://localhost:27017";
+        private readonly IPizzas _testling;
+        public MongoPizzasTest()
+        {
+            _testling = new MongoPizzas(new MongoUrl(MongoCollection.MongoUrl));
+        }
         
         [Fact(DisplayName = "Should be able to retrieve the pizza that was added")]
         public async Task AddOnePizza()
         {
             // given
-            var pizza = new Pizza(PizzaId.Random());
-            var testling = new MongoPizzas(new MongoUrl(MongoUrl));
+            var pizza = Pizza.Now(PizzaId.Random());
             // when
-            await testling.Put(pizza);
+            await _testling.Put(pizza);
             // then
-            var result = await testling.FindById(pizza.Id);
+            var result = await _testling.FindById(pizza.Id);
             result.Should().NotBeNull();
         }
         
@@ -28,10 +32,9 @@ namespace Richargh.Sandbox.NodatimeMongo.IntTest.Persistence
         public async Task UnknownId()
         {
             // given
-            var testling = new MongoPizzas(new MongoUrl(MongoUrl));
             // when
+            var result = await _testling.FindById(PizzaId.Random());
             // then
-            var result = await testling.FindById(PizzaId.Random());
             result.Should().BeNull();
         }
     }
