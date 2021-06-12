@@ -9,5 +9,6 @@ namespace Richargh.Sandbox.NodatimeMongo.IntTest.Persistence
         public const string Name = "Mongo collection";
         
         public const string MongoUrl = "mongodb://localhost:27017";
+        public const int MongoPort = 27017;
     }
 }

@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using MongoDB.Driver;
 using Richargh.Sandbox.NodatimeMongo.Domain;
@@ -22,6 +24,11 @@ namespace Richargh.Sandbox.NodatimeMongo.Persistence
         public async Task<Pizza?> FindById(PizzaId id)
         {
             return (await _allPizzas.FindAsync(x => x.Id.Equals(id))).FirstOrDefault();
+        }
+
+        public Task<List<Pizza>> FindOlderThan(DateTime utcNow)
+        {
+            return _allPizzas.Find(x => x.DateTimeUtc > utcNow).ToListAsync();
         }
     }
 }

@@ -1,4 +1,6 @@
 using System.Threading.Tasks;
+using DotNet.Testcontainers.Containers.Builders;
+using DotNet.Testcontainers.Containers.Modules;
 using FluentAssertions;
 using MongoDB.Driver;
 using Richargh.Sandbox.NodatimeMongo.Domain;
@@ -8,12 +10,29 @@ using Xunit;
 namespace Richargh.Sandbox.NodatimeMongo.IntTest.Persistence
 {
     [Collection(MongoCollection.Name)]
-    public class MongoPizzasTest
+    public class MongoPizzasTest : IAsyncLifetime
     {
         private readonly IPizzas _testling;
+        private readonly TestcontainersContainer _mongoContainer;
+
         public MongoPizzasTest()
         {
+            var testcontainersBuilder = new TestcontainersBuilder<TestcontainersContainer>()
+                .WithImage("mongo")
+                .WithName("mongo")
+                .WithPortBinding(MongoCollection.MongoPort);
+            _mongoContainer = testcontainersBuilder.Build();
             _testling = new MongoPizzas(new MongoUrl(MongoCollection.MongoUrl));
+        }
+
+        public async Task InitializeAsync()
+        {
+            await _mongoContainer.StartAsync();
+        }
+
+        public async Task DisposeAsync()
+        {
+            await _mongoContainer.DisposeAsync();
         }
         
         [Fact(DisplayName = "Should be able to retrieve the pizza that was added")]

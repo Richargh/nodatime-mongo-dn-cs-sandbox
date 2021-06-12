@@ -5,16 +5,19 @@ this project is all about marrying Nodatime to Mongo.
 == Features
 
 * C#8 with enforced Nullability
+* DateTime (Utc and Local)
 * Nodatime
 * Mongo 
   * Using `IsUpsert` to add or replace documents if they already exist
+* Testcontainers.Net for Mongo Instance 
 
 == Usage
 
-. Have docker installed
-. Start MongoDb via docker `docker run -p 27017:27017 --rm --name mongodb mongo`
+. Have docker installed (for Testcontainers)
 . Run tests
 .. `cd NodatimeMongo.IntTest`
 .. `dotnet test`
 
+== Further Reading
 
+* link:https://mongodb.github.io/mongo-csharp-driver/2.12/getting_started/quick_tour/[MongoDb Getting Started]
