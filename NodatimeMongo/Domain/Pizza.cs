@@ -1,9 +1,11 @@
 using System;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace Richargh.Sandbox.NodatimeMongo.Domain
 {
     public class Pizza
     {
+        [BsonId]
         public PizzaId Id { get; }
 
         public DateTime DateTimeUtc { get; }
