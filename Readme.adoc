@@ -1,0 +1,20 @@
+= Nodatime+Mongo (Sandbox)
+
+this project is all about marrying Nodatime to Mongo.
+
+== Features
+
+* C#8 with enforced Nullability
+* Nodatime
+* Mongo 
+  * Using `IsUpsert` to add or replace documents if they already exist
+
+== Usage
+
+. Have docker installed
+. Start MongoDb via docker `docker run -p 27017:27017 --rm --name mongodb mongo`
+. Run tests
+.. `cd NodatimeMongo.IntTest`
+.. `dotnet test`
+
+
