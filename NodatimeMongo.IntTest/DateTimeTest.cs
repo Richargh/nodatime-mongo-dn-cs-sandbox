@@ -41,5 +41,22 @@ namespace Richargh.Sandbox.NodatimeMongo.IntTest
                 parseOffset.Kind.Should().Be(DateTimeKind.Local);
             }
         }
+
+        [Fact(DisplayName =
+            "DateTimes with different kinds Should not be equal")]
+        public void ComparingDateTimesOfDifferentKinds()
+        {
+            // given
+            var nowUtc = DateTime.UtcNow;
+            var nowLocal = nowUtc.ToLocalTime();
+            // when
+            var isEqual = nowUtc == nowLocal;
+            // then
+            using (new AssertionScope())
+            {
+                isEqual.Should().BeFalse();
+                nowUtc.Should().NotBe(nowLocal);
+            }
+        }
     }
 }
