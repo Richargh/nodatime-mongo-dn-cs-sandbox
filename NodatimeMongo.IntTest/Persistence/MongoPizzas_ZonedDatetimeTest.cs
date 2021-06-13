@@ -49,7 +49,8 @@ namespace Richargh.Sandbox.NodatimeMongo.IntTest.Persistence
             await _testling.Put(pizza);
             // then
             var result = await _testling.FindById(pizza.Id);
-            // mongo drops milliseconds during deserialization
+            // the selected serializer drops milliseconds during serialization, otherwise we'd compare via ZonedDateTime.ToOffsetDateTime()
+            // we could fix this by writing our own serializer that uses the extended invariant instead
             result!.DateTime.ToDateTimeUtc().Should().BeCloseTo(pizza.DateTime.ToDateTimeUtc(), TimeSpan.FromSeconds(1));
         }
         

@@ -50,7 +50,8 @@ namespace Richargh.Sandbox.NodatimeMongo.IntTest.Persistence
             // then
             var result = await _testling.FindById(pizza.Id);
             result!.Instant.ToUnixTimeMilliseconds().Should().Be(pizza.Instant.ToUnixTimeMilliseconds());
-            // result!.Instant.Should().Be(pizza.Instant); // cannot assert this because some nanosecond precision is lost after deserialization
+            // result!.Instant.Should().Be(pizza.Instant); // cannot assert this because nanosecond precision is lost during serialization with the standard pattern
+            // we could fix this by writing our own serializer that uses the extended Iso pattern instead
         }
         
         [Fact(DisplayName = "Should be able to find one Pizza older than one minute ago")]
