@@ -28,10 +28,8 @@ namespace Richargh.Sandbox.NodatimeMongo.Persistence
 
         public Task<List<ZonedDateTimePizza>> FindOlderThan(ZonedDateTime zonedDateTime)
         {
-            // cannot get the following to work. Comparing ZoneDateTimes is not supported. Probably because they are represented as strings internally
-            Builders<ZonedDateTimePizza>.Filter.Lt(x => x.DateTime, zonedDateTime);
-            var comparer = ZonedDateTime.Comparer.Instant;
-            return _allPizzas.Find(x => comparer.Compare(x.DateTime, zonedDateTime) < 0).ToListAsync();
+            var filter = Builders<ZonedDateTimePizza>.Filter.Gt(x => x.DateTime, zonedDateTime);
+            return _allPizzas.Find(filter).ToListAsync();
         }
     }
 }

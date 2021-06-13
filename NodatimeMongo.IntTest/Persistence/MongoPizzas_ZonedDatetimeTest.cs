@@ -6,6 +6,7 @@ using DotNet.Testcontainers.Containers.Modules;
 using FluentAssertions;
 using MongoDB.Driver;
 using NodaTime;
+using NodaTime.Text;
 using Richargh.Sandbox.NodatimeMongo.Domain;
 using Richargh.Sandbox.NodatimeMongo.Persistence;
 using Xunit;
@@ -54,8 +55,7 @@ namespace Richargh.Sandbox.NodatimeMongo.IntTest.Persistence
             result!.DateTime.ToDateTimeUtc().Should().BeCloseTo(pizza.DateTime.ToDateTimeUtc(), TimeSpan.FromSeconds(1));
         }
         
-        [Fact(DisplayName = "Should be able to find one Pizza older than one minute ago",
-            Skip = "Cannot get this to work. Comparing ZoneDateTimes is not supported.")]
+        [Fact(DisplayName = "Should be able to find one Pizza older than one minute ago")]
         public async Task OnePizzaOlder()
         {
             // given
@@ -68,8 +68,7 @@ namespace Richargh.Sandbox.NodatimeMongo.IntTest.Persistence
             result.Select(x => x.Id).Should().HaveCount(1).And.Contain(pizza.Id);
         }
         
-        [Fact(DisplayName = "Should not be able to find one Pizza older than the future",
-            Skip = "Cannot get this to work. Comparing ZoneDateTimes is not supported.")]
+        [Fact(DisplayName = "Should not be able to find one Pizza older than the future")]
         public async Task NoPizzaOlderthanFuture()
         {
             // given
@@ -80,6 +79,22 @@ namespace Richargh.Sandbox.NodatimeMongo.IntTest.Persistence
                 new ZonedDateTime(_clock.GetCurrentInstant() + Duration.FromMinutes(1), DateTimeZone.Utc));
             // then
             result.Select(x => x.Id).Should().HaveCount(0);
+        }
+        
+        [Fact(DisplayName = "Should be able to find one Pizza created in europe that is older than the indian query",
+            Skip = "Does not work because Mongo only compares the strings alphanumerically")]
+        public async Task OneEuropeanPizzaOlder()
+        {
+            // given
+            var pattern = ZonedDateTimePattern.CreateWithInvariantCulture("F", DateTimeZoneProviders.Tzdb);
+            var at1300Utc = pattern.Parse("2021-06-05T15:00:00 Europe/Paris (+02:00)").Value;
+            var at1200Utc = pattern.Parse("2021-06-05T17:30:00 Asia/Kolkata (+05:30)").Value;
+            var pizza = new ZonedDateTimePizza(ZonedDateTimePizzaId.Random(), at1300Utc);
+            await _testling.Put(pizza);
+            // when
+            var result = await _testling.FindOlderThan(at1200Utc);
+            // then
+            result.Select(x => x.Id).Should().HaveCount(1).And.Contain(pizza.Id);
         }
 
         private ZonedDateTimePizza CreatePizza() 
