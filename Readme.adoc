@@ -1,15 +1,75 @@
-= Nodatime+Mongo (Sandbox)
+= Noda Time + Mongo (Sandbox)
 
-this project is all about marrying Nodatime to Mongo.
+This project is all about marrying Noda Time with Mongo.
 
 == Features
 
-* C#8 with enforced Nullability
+* C#8 with link:https://docs.microsoft.com/en-us/dotnet/csharp/nullable-references[Nullable reference types]
 * DateTime (Utc and Local)
-* Nodatime
-* Mongo 
-  * Using `IsUpsert` to add or replace documents if they already exist
-* Testcontainers.Net for Mongo Instance
+* link:https://nodatime.org/[Noda Time]
+* link:https://mongodb.github.io/mongo-csharp-driver/2.12/getting_started/quick_tour/[Mongo]
+** Using link:https://gist.github.com/a3dho3yn/91dcc7e6f606eaefaf045fc193d3dcc3[`IsUpsert`] to add or replace documents if they already exist
+* link:https://github.com/HofmeisterAn/dotnet-testcontainers[.NET Testcontainers] for Mongo Instance
+
+== Motivation
+
+This repository explores how to combine Noda Time with MongoDb.
+
+Noda Time was written by Microsoft MVP Jon Skeet (the guy from the link:https://toggl.com/track/programming-princess/[Git the Princess] comic :D) because the DateTime Api of .NET is inadequate, some might even say broken.
+
+[quote,  Jon Skeet, https://blog.nodatime.org/2011/08/what-wrong-with-datetime-anyway.html]
+____
+For example, assuming the clock doesn't tick between the two property invocations, what should the value of "mystery" be in the following snippet?
+
+  DateTime utc = DateTime.UtcNow;
+  DateTime local = DateTime.Now;
+  bool mystery = local == utc;
+
+I honestly don't know what this will do. There are three options which all make a certain amount of sense (...)
+____
+
+The question is interesting. If the clock doesn't tick between instantiation of `DateTime utc` and `DateTime local` then both describe the same instant and they are equal. But should they be equatable at all? The type system allows this, their fundamental difference is only reflected by the value of their property '.Kind': `DateTime.Now.Kind != DateTime.UtcNow.Kind`.
+
+NOTE: The C# designers decided that DateTimes of different Kinds are not equal: `mystery` is `false`.
+
+Weirdly in C# `Kind` can only be one of three possible values: `Utc`, `Local` (local time of you machine) and `Unspecified` (anything that is not Utc or local time). If you convert UTC to IST (india standard time), and IST is not the time zone of your local machine, then the kind is unspecified. If you `DateTime.parse("2021-10-01T10:00:00")` a string that does not include a time zone info then it also becomes unspecified. If you want to keep the actual time zone information, then you have to store that in a separate field. 
+
+I hope you can agree that the DateTime Api in C# is inadequate now. Java had a similar problem prior to Java SE 8 which is why a bunch of crafty people created link:https://www.joda.org/joda-time/[Joda-Time]. The api they created was the inspiration for the new `java.time` api that superseded it as well as for Noda Time. The one big thing that Noda Time does (and Joda-Time before that) is to have multiple types to represent different time concepts. We'll only explore a couple here (for more on this check out Jon Skeet's talk link:https://www.youtube.com/watch?v=saeKBuPewcU[Working with Time is Easy Jon Skeet] or the link:https://nodatime.org/3.0.x/userguide/core-types[Noda Time docs]):
+
+* *Instant* +
+  It's the elapsed time since the epoch (for Noda Time it's the link:https://en.wikipedia.org/wiki/Unix_time[unix epoch] which was arbitrarily selected to be 1970-01-01). It has nanosecond precision and no concept of years, months, days. No calendar. This makes it very nice to work it because comparisons are very easy.
+* *LocalDateTime* +
+  A "point on a time line in a particular calendar system, but with no concept of the offset from UTC". Quite useful for scheduled events. For example an alarm clock that is always supposed to wake you up at 7:00 AM no matter what time zone you are in. 
+* *ZonedDateTime* +
+  A "LocalDateTime within a specific time zone". Quite useful for agreeing when to meet. Not unique though due to strange things like summer/winter time. For example 2:30 AM can occur twice or not at all depending on your date and time zone. That also makes ordering ZonedDateTime quite hard which I suspect is the reason that it's IEquatable but not IComparable. If you need comparison you have to either convert it to `LocalDateTime`/`Instant` or use the `ZonedDateTime.Comparer.Local`/`ZonedDateTime.Comparer.Instant`. Either way you have to be explicit how you want to compare them.
+
+== Noda Time and Mongo
+
+Mongo has a much more link:https://docs.mongodb.com/manual/reference/bson-types/[limited type arsenal] than Noda Time. The two date/time types are: 
+
+* *Timestamp* +
+  "BSON has a special timestamp type for _internal_ MongoDB use and is not associated with the regular Date type. (...) For most cases, in application development, you will want to use the BSON date type."
+* *Date* +
+  "BSON Date is a 64-bit integer that represents the number of milliseconds since the Unix epoch (Jan 1, 1970). This results in a representable date range of about 290 million years into the past and future."
+
+We can ignore Timestamp because it's only for internal use. Date meanwhile maps very well to the Instant concept of Noda Time. What we don't have is a format of LocalDateTime or ZonedDateTime. For these types we can no longer do date based queries like "all documents whose creation date is after June 5th 2021". The `ZonedDateTime.Comparer.Instant.Compare(...)` approach produces a nice LINQ `InvalidOperationException`.
+
+We can of course serialize both types to the ISO 8601 format and store them as strings, which is exactly what the `LocalDateTimeSerializer` and `ZonedDateTimeSerializer` do. That however limits the queries we can perform when it comes to these dates. Strings in C# are not comparable and even in languages where they are comparable (f.ex. JavaScript) a query that asks for documents with a creation date after _2021-06-05T15:00:00 Europe/Paris (+02:00)_ (13:00 Utc) won't return _2021-06-05T17:30:00 Asia/Kolkata (+05:30)_ (12:00 Utc) because it can only compare alphanumerically. 
+
+To solve this we could probably write a projection that converts everything to instant before filtering. What we don't want to do is to store the Instant directly aka a ZonedDateTime where we stripped out the time zone. 
+
+As Jon Skeet (naturally) points out link:https://codeblog.jonskeet.uk/2019/03/27/storing-utc-is-not-a-silver-bullet/[Storing UTC is not a silver bullet]. Time zone rules change. It's normal and your application should be able to deal with that. A meeting that is scheduled for _2022-04-01T09:00:00 Europe/Madrid (+02)_ should still happen at 9:00 even if Spain decides to no longer use daylight saving time and the new format becomes _2022-04-01T09:00:00 Europe/Madrid (+01)_. That's one of the reasons why storing the time zone is important. The Time Zone Database (tzdb) saw three releases in 2020, three in 2019 and five in 2018, each containing multiple changes.
+
+== Summary
+
+The rules for storing date/time in your application and MongoDb are: 
+
+. Don't use System.DateTime. 
+. Time zones change multiple times per year and your application should be able to handle that.
+. Use the right link:https://nodatime.org/3.0.x/userguide/core-types[Noda Time type] for the right concept: Instant, Duration, Interval, LocalDate, LocalTime, LocalDateTime, ZonedDateTime, OffsetDateTime or Period. 
+. Follow Skeet's "Principle of preserving supplied data". If you get a time zone, keep it. Use a `Noda Time ZonedDateTime` and serialize to `MongoDb String` where possible.
+** "Any time you discard information, that should be a *conscious* choice." So if you disregard this principle, make sure it's intentional and you can live with the consequences.
+. "Machine-generated timestamps are naturally instants in time, recording “the instant at which something occurred” in an unambiguous way. Storing those in UTC is entirely reasonable – potentially with an offset or time zone if the location at which the timestamp was generated is relevant." So if we log or create events or something, then we can store that in Utc and query nicely as well. Use a `Noda Time Instant` and serialize to a `MongoDb Date`. 
 
 == Usage
 
@@ -31,7 +91,6 @@ this project is all about marrying Nodatime to Mongo.
 ** Run the test you want to investigate
 * Open link:https://robomongo.org/download[Robo 3T (not Studio) or similar] and connect to `localhost:27017`
 * After that don't forget to remove the container (see <<Already in use>>).
-
 
 === Already in use
 > The container name mongo is already in use by container <containerId>
