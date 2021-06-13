@@ -23,6 +23,8 @@ namespace Richargh.Sandbox.NodatimeMongo.IntTest.Serialization
         /// <see href="https://time.is/IST">Time.is</see>
         /// </summary>
         private const string IndiaStandardTime = "Asia/Kolkata";
+        
+        private const string EuropeMadridTime = "Europe/Madrid";
 
         public ZonedDateTimeFormatTest()
         {
@@ -86,6 +88,38 @@ namespace Richargh.Sandbox.NodatimeMongo.IntTest.Serialization
             using (new AssertionScope())
             {
                 result.Should().Contain($"2021-10-05T15:45:00 {IndiaStandardTime} (+05:30)");
+            }
+        }
+        
+        [Fact (DisplayName = "Should create a nicely formatted ISO 8601 Europe daylight saving time datetime")]
+        public void EuropeDaylightSavingFormat()
+        {
+            // given
+            var zone = DateTimeZoneProviders.Tzdb.GetZoneOrNull(EuropeMadridTime)!;
+            var zonedDateTime = Instant.FromUtc(2021, 10, 30,   10, 15, 0).InZone(zone);
+            var pattern = ZonedDateTimePattern.CreateWithInvariantCulture(ExtendedInvariant, DateTimeZoneProviders.Tzdb);
+            // when
+            var result = pattern.Format(zonedDateTime);
+            // then
+            using (new AssertionScope())
+            {
+                result.Should().Contain($"2021-10-30T12:15:00 {EuropeMadridTime} (+02)");
+            }
+        }
+        
+        [Fact (DisplayName = "Should create a nicely formatted ISO 8601 Europe standard time datetime")]
+        public void EuropeStandardFormat()
+        {
+            // given
+            var zone = DateTimeZoneProviders.Tzdb.GetZoneOrNull(EuropeMadridTime)!;
+            var zonedDateTime = Instant.FromUtc(2021, 10, 31,   10, 15, 0).InZone(zone);
+            var pattern = ZonedDateTimePattern.CreateWithInvariantCulture(ExtendedInvariant, DateTimeZoneProviders.Tzdb);
+            // when
+            var result = pattern.Format(zonedDateTime);
+            // then
+            using (new AssertionScope())
+            {
+                result.Should().Contain($"2021-10-31T11:15:00 {EuropeMadridTime} (+01)");
             }
         }
     }
